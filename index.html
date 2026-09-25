@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#e9ebef">
+<title>FoodSpec · liquid glass nutrition lens</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍎</text></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/manrope@latest/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/manrope@latest/600.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/manrope@latest/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/manrope@latest/800.css">
+<style>
+:root{
+  --purple:#1c1c1e; --violet:#8e8e93; --pink:#d1d1d6; --deep:#1c1c1e;
+  --ink:#1c1c22; --ink-soft:rgba(28,28,34,.62);
+  --gb:18px; --gx:0; --gy:0; --imp:0;
+  --spring:cubic-bezier(.34,1.56,.44,1);
+  --smooth:cubic-bezier(.32,.72,.25,1.1);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Manrope',system-ui,-apple-system,sans-serif;
+  background:#e9ebef;
+  color:var(--ink);
+  display:block;
+  overflow:hidden; font-variant-numeric:tabular-nums;
+  min-height:100dvh;
+  overscroll-behavior:none;
+}
+/* ============ APP STAGE (real device fullscreen, no fake phone) ============ */
+.phone{
+  position:relative; width:100vw; height:100dvh; max-width:none;
+  overflow:hidden; background:transparent; isolation:isolate;
+  border:0; border-radius:0; box-shadow:none;
+  --gx:0; --gy:0; --imp:0;
+}
+.island{display:none !important}
+#stage3d{
+  position:absolute;inset:0;
+  transform:perspective(1200px) rotateX(calc(var(--gy)*-5deg)) rotateY(calc(var(--gx)*5deg));
+  transform-style:preserve-3d;
+}
+/* ============ LIQUID BACKGROUND ============ */
+.layer-bg{display:none}
+.blob{position:absolute;filter:blur(46px);opacity:.6;mix-blend-mode:multiply}
+.blob i{display:block;width:100%;height:100%;border-radius:42% 58% 62% 38%/45% 42% 58% 55%;animation:morph 9s ease-in-out infinite alternate}
+.b1{width:340px;height:320px;top:-70px;left:-70px;background:radial-gradient(circle at 35% 30%,#e2e2e6,#c9c9d1 70%)}
+.b2{width:300px;height:300px;top:32%;right:-80px;background:radial-gradient(circle at 40% 35%,#ececee,#d5d5db 70%)}
+.b2 i{animation-duration:11s;animation-direction:alternate-reverse}
+.b3{width:380px;height:340px;bottom:-110px;left:12%;background:radial-gradient(circle at 45% 30%,#e6e6ea,#c2c2ca 75%)}
+.b3 i{animation-duration:13s}
+@keyframes morph{
+  0%{border-radius:42% 58% 62% 38%/45% 42% 58% 55%;transform:rotate(0deg) scale(1)}
+  50%{border-radius:58% 42% 40% 60%/55% 58% 42% 45%;transform:rotate(8deg) scale(1.06)}
+  100%{border-radius:38% 62% 55% 45%/42% 55% 48% 58%;transform:rotate(-6deg) scale(.97)}
+}
+.noise{position:absolute;inset:0;z-index:40;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");}
+/* ============ GLASS RECIPE ============ */
+.glass{
+  position:relative;
+  background:rgba(255,255,255,.72);
+  -webkit-backdrop-filter:blur(var(--gb)) saturate(1.8) brightness(1.06);
+  backdrop-filter:blur(var(--gb)) saturate(1.8) brightness(1.06);
+  border:1px solid rgba(255,255,255,.65); border-radius:24px;
+  box-shadow:0 10px 30px rgba(0,0,0,.10),0 2px 8px rgba(0,0,0,.06),
+    inset 0 1.5px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(255,255,255,.3),
+    inset 1px 0 0 rgba(255,255,255,.45),inset -1px 0 0 rgba(255,255,255,.45);
+}
+.glass::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.85) 46%,rgba(255,255,255,.14) 54%,transparent 62%);
+  mix-blend-mode:screen;opacity:.55;
+  transform:translate3d(calc(var(--gx)*26px),calc(var(--gy)*18px),0);
+}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:inset 0 0 20px rgba(255,255,255,.26);}
+/* ============ STATUS BAR (removed — real device uses its own) ============ */
+.statusbar{display:none !important}
+/* ============ SCREENS ============ */
+.screen{position:absolute;inset:0;z-index:10;padding:calc(env(safe-area-inset-top,0px) + 12px) 18px 128px;
+  display:flex;flex-direction:column;gap:14px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;
+  opacity:0;pointer-events:none;transform:translateY(18px) scale(.97);filter:blur(8px);
+  transition:opacity .4s ease,transform .5s var(--smooth),filter .4s ease;}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{opacity:1;pointer-events:auto;transform:none;filter:none}
+/* scan tab: fullscreen camera, glass floats on top */
+#screenScan{overflow:hidden;padding:0;gap:0}
+#screenScan .cap-chip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);z-index:8;padding:5px 14px;font-size:10.5px;white-space:nowrap}
+#screenScan .stats{position:absolute;top:calc(env(safe-area-inset-top,0px) + 46px);left:12px;right:12px;z-index:8;padding:4px;gap:4px;border-radius:20px}
+#screenScan .seg{padding:6px 8px 7px;border-radius:15px}
+#screenScan .seg b{font-size:18px}
+#screenScan .view{position:absolute;inset:0;flex:none;min-height:0;border-radius:0;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+#screenScan .view::before{opacity:.28}
+#screenScan .view::after{display:none}
+#screenScan .controls{bottom:calc(env(safe-area-inset-bottom,0px) + 92px)}
+.pz1{transform:translate3d(calc(var(--gx)*5px),calc(var(--gy)*4px),0)}
+.pz2{transform:translate3d(calc(var(--gx)*9px),calc(var(--gy)*7px),0)}
+/* ============ SCAN SCREEN ============ */
+.cap-chip{align-self:center;padding:7px 18px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.stats{display:grid;grid-template-columns:1.1fr 1.1fr 1fr;gap:6px;padding:6px;border-radius:26px}
+.seg{border-radius:20px;padding:9px 12px 10px;text-align:center;position:relative;overflow:hidden;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.55)}
+.seg small{display:block;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.seg b{font-size:21px;font-weight:800;line-height:1.15;display:block}
+.seg em{font-style:normal;font-size:11px;font-weight:700;opacity:.7}
+.seg-blue{background:linear-gradient(160deg,rgba(96,165,250,.55),rgba(147,197,253,.28));color:#123a7c}
+.seg-red{background:linear-gradient(160deg,rgba(248,113,113,.55),rgba(252,165,165,.28));color:#7a1a1a}
+.seg-amber{background:linear-gradient(160deg,rgba(251,191,36,.5),rgba(253,230,138,.3));color:#7c4a03}
+.seg.pulse{animation:segPulse .9s var(--spring)}
+@keyframes segPulse{0%{transform:scale(1)}35%{transform:scale(1.09);box-shadow:0 0 30px rgba(255,255,255,.9)}100%{transform:scale(1)}}
+.view{flex:1;min-height:0;border-radius:16px;overflow:hidden;position:relative;touch-action:none}
+#feedInner{position:absolute;inset:0;transition:transform .7s var(--smooth),filter .4s ease;transform:scale(1.14)}
+#feedInner.wide{transform:scale(.92)}
+#feedInner video,#feedInner img.feed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#imgFallback{animation:kenburns 14s ease-in-out infinite alternate}
+@keyframes kenburns{from{transform:scale(1) translate(0,0)}to{transform:scale(1.14) translate(-2%,2%)}}
+#imgCaptured{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.06);transition:opacity .3s,transform .45s var(--spring);z-index:2}
+#imgCaptured.show{opacity:1;transform:scale(1)}
+#gridOverlay{position:absolute;inset:0;z-index:3;opacity:0;transition:opacity .5s;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.28) 1px,transparent 1px);
+  background-size:44px 44px;mix-blend-mode:overlay}
+.processing #gridOverlay{opacity:.5}
+.cor{position:absolute;width:36px;height:36px;z-index:4;border:3.5px solid rgba(255,255,255,.95);border-radius:8px;
+  filter:drop-shadow(0 0 6px rgba(0,0,0,.45));transition:all .55s var(--spring)}
+.c1{top:calc(env(safe-area-inset-top,0px) + 132px);left:56px;border-right:0;border-bottom:0}
+.c2{top:calc(env(safe-area-inset-top,0px) + 132px);right:56px;border-left:0;border-bottom:0}
+.c3{bottom:calc(env(safe-area-inset-bottom,0px) + 186px);left:56px;border-right:0;border-top:0}
+.c4{bottom:calc(env(safe-area-inset-bottom,0px) + 186px);right:56px;border-left:0;border-top:0}
+.processing .cor{border-color:#fff;filter:drop-shadow(0 0 10px rgba(255,255,255,.9))}
+.processing .c1{top:calc(env(safe-area-inset-top,0px) + 172px);left:96px}.processing .c2{top:calc(env(safe-area-inset-top,0px) + 172px);right:96px}
+.processing .c3{bottom:calc(env(safe-area-inset-bottom,0px) + 226px);left:96px}.processing .c4{bottom:calc(env(safe-area-inset-bottom,0px) + 226px);right:96px}
+#beam{position:absolute;left:6%;right:6%;height:3px;z-index:5;opacity:0;pointer-events:none;border-radius:3px;
+  background:linear-gradient(90deg,transparent,#fff 40%,#e5e5ea 60%,transparent);
+  box-shadow:0 0 18px 5px rgba(255,255,255,.7),0 0 40px 14px rgba(0,0,0,.12);mix-blend-mode:screen}
+.processing #beam{opacity:1;animation:sweep 1.15s ease-in-out infinite alternate}
+@keyframes sweep{from{top:10%}to{top:88%}}
+.pdot{position:absolute;width:7px;height:7px;border-radius:50%;background:#fff;z-index:5;pointer-events:none;
+  box-shadow:0 0 12px 3px rgba(255,255,255,.8);transition:transform 1.25s var(--smooth),opacity 1.25s}
+.pdot.go{opacity:0}
+#stepsBox{display:none !important}
+@keyframes popIn{from{transform:translateY(14px) scale(.7);opacity:0}to{transform:none;opacity:1}}
+/* viewport label chips removed */
+/* view-hint removed */
+.controls{position:absolute;left:12px;right:12px;bottom:12px;z-index:7;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:0}
+.sqbtn{width:50px;height:50px;border-radius:17px;border:0;display:grid;place-items:center;cursor:pointer;color:var(--ink);transition:transform .2s var(--spring)}
+.sqbtn svg{width:24px;height:24px}
+.sqbtn.on{color:#fff;background:#1c1c1e;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.controls .left{justify-self:start}.controls .right{justify-self:end}
+.shutter{width:78px;height:78px;border-radius:50%;border:2.5px solid rgba(255,255,255,.85);cursor:pointer;
+  background:rgba(255,255,255,.25);-webkit-backdrop-filter:blur(14px) saturate(1.6);backdrop-filter:blur(14px) saturate(1.6);
+  box-shadow:0 10px 28px rgba(0,0,0,.25),inset 0 2px 8px rgba(255,255,255,.85),inset 0 -3px 8px rgba(0,0,0,.12);
+  display:grid;place-items:center;transition:transform .25s var(--spring)}
+.shutter i{width:56px;height:56px;border-radius:50%;display:block;
+  background:radial-gradient(circle at 32% 26%,#fff,#f2f2f5 55%,#d9d9de);
+  box-shadow:inset 0 -5px 12px rgba(0,0,0,.18),0 5px 16px rgba(0,0,0,.25),inset 0 3px 6px rgba(255,255,255,.95);
+  transition:transform .25s var(--spring)}
+.shutter:active i{transform:scale(.86)}
+/* ============ TAB BAR ============ */
+#tabBar{position:absolute;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:35;
+  height:66px;border-radius:30px;display:grid;grid-template-columns:repeat(3,1fr);align-items:center;
+  background:rgba(255,255,255,.86);
+  -webkit-backdrop-filter:blur(22px) saturate(1.8);backdrop-filter:blur(22px) saturate(1.8);
+  border:1px solid rgba(0,0,0,.06);
+  box-shadow:0 12px 30px rgba(0,0,0,.12),inset 0 1.5px 0 rgba(255,255,255,.9);}
+#tabBar::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 46%,transparent 60%);
+  transform:translate3d(calc(var(--gx)*30px),calc(var(--gy)*14px),0);mix-blend-mode:screen}
+#tabIndicator{position:absolute;top:8px;bottom:8px;width:calc(33.333% - 10px);left:5px;border-radius:24px;
+  background:rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.06);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+  transition:transform .5s var(--smooth);}
+#tabIndicator.squish{animation:squish .5s var(--spring)}
+@keyframes squish{0%{border-radius:24px;scale:1 1}40%{border-radius:30px 14px 26px 16px;scale:1.12 .82}75%{border-radius:16px 28px 14px 30px;scale:.94 1.08}100%{border-radius:24px;scale:1 1}}
+.tab{position:relative;z-index:2;border:0;background:none;color:rgba(28,28,34,.55);font-family:inherit;
+  font-size:10.5px;font-weight:800;letter-spacing:.06em;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:color .3s,text-shadow .3s}
+.tab svg{width:22px;height:22px;transition:transform .4s var(--spring)}
+.tab.active{color:#1c1c1e;text-shadow:none}
+.tab.active svg{transform:scale(1.14) translateY(-1px)}
+/* ============ HOME ============ */
+.hello{display:flex;justify-content:space-between;align-items:end;padding:0 4px}
+.hello h1{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.hello p{font-size:12px;font-weight:700;color:var(--ink-soft)}
+.hello .date{padding:8px 14px;border-radius:999px;font-size:11px;font-weight:800;color:var(--ink-soft)}
+.ecard{padding:18px;display:flex;gap:18px;align-items:center;border-radius:30px}
+.ringwrap{position:relative;width:132px;height:132px;flex:none}
+.ringwrap svg{transform:rotate(-90deg)}
+.ringwrap .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ringwrap .ctr b{font-size:26px;font-weight:800}
+.ringwrap .ctr small{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase}
+#ringProg{transition:stroke-dashoffset 1.1s var(--smooth)}
+.ecol{flex:1;display:flex;flex-direction:column;gap:8px}
+.pillrow{display:flex;gap:8px;flex-wrap:wrap}
+.mini{padding:7px 12px;border-radius:999px;font-size:11px;font-weight:800;color:var(--ink-soft)}
+.mini.hot{background:linear-gradient(140deg,rgba(251,146,60,.5),rgba(253,186,116,.3));color:#7c2d12}
+.mrow{display:flex;flex-direction:column;gap:4px}
+.mrow span{display:flex;justify-content:space-between;font-size:11.5px;font-weight:800;color:var(--ink-soft)}
+.track{height:8px;border-radius:6px;background:rgba(255,255,255,.5);overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.15)}
+.fill{height:100%;border-radius:6px;background:#1c1c1e;
+  transition:width 1s var(--smooth)}
+@keyframes shimmer{to{background-position:-200% 0}}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mcard{padding:12px;border-radius:22px;text-align:center}
+.mcard b{font-size:18px;font-weight:800;display:block}
+.mcard small{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.sect{display:flex;justify-content:space-between;align-items:center;padding:0 4px}
+.sect h2{font-size:15px;font-weight:800}
+.sect span{font-size:11px;font-weight:800;color:var(--ink-soft)}
+#recentList{display:flex;flex-direction:column;gap:10px}
+.rcard{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:22px;animation:popIn .5s var(--spring)}
+.rcard img{width:48px;height:48px;border-radius:15px;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.rcard .inf{flex:1}
+.rcard .inf b{font-size:13.5px;font-weight:800;display:block}
+.rcard .inf small{font-size:11px;font-weight:700;color:var(--ink-soft)}
+.rcard .kcal{padding:6px 11px;border-radius:999px;font-size:11px;font-weight:800;color:var(--deep);
+  background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.7)}
+.empty{padding:22px;text-align:center;border-radius:22px;border:1.5px dashed rgba(0,0,0,.2);color:var(--ink-soft);font-size:12.5px;font-weight:700;background:rgba(255,255,255,.25)}
+/* ============ SETTINGS ============ */
+.list{border-radius:26px;overflow:hidden;display:flex;flex-direction:column}
+.row{display:flex;justify-content:space-between;align-items:center;padding:15px 18px;gap:12px}
+.row + .row{border-top:1px solid rgba(255,255,255,.5)}
+.row .lb{display:flex;align-items:center;gap:11px;font-size:13.5px;font-weight:800}
+.row .lb .ic{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;color:#fff;font-size:15px;
+  background:#1c1c1e;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.row small{display:block;font-size:10.5px;font-weight:700;color:var(--ink-soft)}
+.sw{position:relative;width:52px;height:31px;flex:none}
+.sw input{position:absolute;opacity:0;inset:0;margin:0;z-index:2;cursor:pointer}
+.sw span{position:absolute;inset:0;border-radius:999px;background:rgba(0,0,0,.18);border:1px solid rgba(0,0,0,.08);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.2);transition:background .35s}
+.sw span::after{content:"";position:absolute;top:2.5px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;
+  box-shadow:0 3px 8px rgba(0,0,0,.3),inset 0 -2px 4px rgba(0,0,0,.12);transition:transform .35s var(--spring)}
+.sw input:checked + span{background:#1c1c1e}
+.sw input:checked + span::after{transform:translateX(21px)}
+input[type=range]{width:150px;accent-color:var(--purple)}
+.about{padding:16px 18px;border-radius:24px;font-size:11.5px;font-weight:700;color:var(--ink-soft);line-height:1.6}
+.about b{color:var(--deep)}
+/* ============ SHEETS ============ */
+.sheet{position:absolute;inset:0;z-index:50;display:flex;align-items:flex-end;pointer-events:none}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.3);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+  opacity:0;transition:opacity .45s;pointer-events:none}
+.sheet.open{pointer-events:auto}
+.sheet.open .scrim{opacity:1;pointer-events:auto}
+.panel{position:relative;width:100%;max-height:min(80%,660px);border-radius:36px 36px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom,0px) + 18px);
+  background:rgba(255,255,255,.86);
+  -webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);
+  border:1px solid rgba(255,255,255,.8);border-bottom:0;
+  box-shadow:0 -18px 50px rgba(0,0,0,.18),inset 0 2px 0 rgba(255,255,255,.95);
+  transform:translateY(105%);transition:transform .6s var(--smooth);display:flex;flex-direction:column;gap:12px}
+.panel::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(115deg,transparent 34%,rgba(255,255,255,.7) 47%,transparent 60%);
+  transform:translate3d(calc(var(--gx)*30px),0,0);mix-blend-mode:screen}
+.sheet.open .panel{transform:translateY(0)}
+.handle{width:52px;height:5.5px;border-radius:99px;background:rgba(0,0,0,.25);margin:2px auto 0;box-shadow:inset 0 1px 2px rgba(255,255,255,.9)}
+.rhead{display:flex;align-items:center;gap:13px}
+.thumbwrap{position:relative;width:66px;height:66px;flex:none}
+.thumbwrap img{width:66px;height:66px;border-radius:22px;object-fit:cover;box-shadow:0 6px 18px rgba(0,0,0,.2);border:1.5px solid rgba(255,255,255,.9)}
+.thumbwrap svg{position:absolute;inset:-5px;transform:rotate(-90deg)}
+.rhead .tt{flex:1}
+.rhead .tt b{font-size:17px;font-weight:800;display:block;letter-spacing:-.01em}
+.conf{display:inline-flex;align-items:center;gap:6px;margin-top:5px;padding:5px 11px;border-radius:999px;font-size:10.5px;font-weight:800;color:#065f46;
+  background:rgba(110,231,183,.35);border:1px solid rgba(255,255,255,.7)}
+.conf i{width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 7px #10b981}
+.xbtn{width:36px;height:36px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;color:var(--ink-soft);
+  background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 0 #fff;transition:transform .2s var(--spring)}
+.xbtn:active{transform:scale(.88)}
+#pagesWrap{display:flex;transition:transform .55s var(--smooth);overflow:hidden}
+.page{min-width:100%;display:flex;flex-direction:column;gap:12px;padding:2px;overflow-y:auto;max-height:44vh;scrollbar-width:none}
+.page::-webkit-scrollbar{display:none}
+.kcalrow{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:24px}
+.kcalrow .big b{font-size:34px;font-weight:800;letter-spacing:-.03em;display:block;line-height:1}
+.kcalrow .big small{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.kcalrow .side{margin-left:auto;text-align:right;font-size:11.5px;font-weight:800;color:var(--ink-soft);line-height:1.7}
+.bars{display:flex;flex-direction:column;gap:9px;padding:14px 16px;border-radius:24px}
+.brow{display:grid;grid-template-columns:64px 1fr 52px;align-items:center;gap:10px;font-size:12px;font-weight:800}
+.brow em{font-style:normal;text-align:right;color:var(--ink-soft)}
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vchip{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:20px}
+.vchip svg{flex:none;transform:rotate(-90deg)}
+.vchip b{font-size:12.5px;font-weight:800;display:block}
+.vchip small{font-size:10.5px;font-weight:700;color:var(--ink-soft)}
+.coachcard{padding:15px 16px;border-radius:24px;font-size:13px;font-weight:700;line-height:1.65;color:var(--ink)}
+.coachcard .who{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--deep)}
+.qchips{display:flex;gap:8px;flex-wrap:wrap}
+.qchip{border:1px solid rgba(0,0,0,.15);background:rgba(255,255,255,.6);color:var(--ink);font-family:inherit;
+  font-size:11.5px;font-weight:800;padding:8px 13px;border-radius:999px;cursor:pointer;transition:transform .2s var(--spring)}
+.qchip:active{transform:scale(.92)}
+.dots{display:flex;justify-content:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:99px;background:rgba(0,0,0,.18);transition:all .4s var(--spring);border:0;padding:0;cursor:pointer}
+.dot.on{width:22px;background:#1c1c1e;box-shadow:none}
+.acts{display:flex;gap:10px}
+#addBtn{flex:1;border:0;cursor:pointer;font-family:inherit;font-size:14.5px;font-weight:800;color:#fff;padding:15px;border-radius:22px;
+  background:#1c1c1e;border:1px solid rgba(255,255,255,.2);position:relative;overflow:hidden;
+  box-shadow:0 12px 26px rgba(0,0,0,.3),inset 0 1.5px 0 rgba(255,255,255,.25);transition:transform .25s var(--spring)}
+#addBtn::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.6) 47%,transparent 62%);
+  transform:translate3d(calc(var(--gx)*24px),0,0);mix-blend-mode:screen}
+#addBtn:active{transform:scale(.96)}
+#addBtn.done{background:#059669;box-shadow:0 12px 26px rgba(5,150,105,.35)}
+#rescanBtn{border:0;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:800;color:var(--deep);padding:15px 20px;border-radius:22px;
+  background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 0 #fff;transition:transform .25s var(--spring)}
+#rescanBtn:active{transform:scale(.95)}
+/* coach sheet */
+#sheetCoach .panel{max-height:min(66%,560px)}
+#chatBox{flex:1;min-height:180px;max-height:34vh;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:4px 2px;scrollbar-width:none}
+#chatBox::-webkit-scrollbar{display:none}
+.msg{max-width:82%;padding:11px 14px;border-radius:19px;font-size:13px;font-weight:700;line-height:1.55;animation:popIn .4s var(--spring)}
+.msg.coach{align-self:flex-start;border-bottom-left-radius:6px;color:var(--ink);
+  background:rgba(255,255,255,.66);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.85);box-shadow:0 6px 16px rgba(0,0,0,.1),inset 0 1px 0 #fff}
+.msg.user{align-self:flex-end;border-bottom-right-radius:6px;color:#fff;background:#1c1c1e;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.typing{display:flex;gap:4px;padding:14px 16px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--violet);animation:tp 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tp{50%{transform:translateY(-5px);opacity:.5}}
+/* coach orb removed */
+/* ============ FX LAYERS ============ */
+#flashOverlay{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:55}
+#flashOverlay.show{animation:flash .38s ease-out}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+#rippleLayer{display:none !important}
+.tap{animation:none}
+/* ============ SPLASH ============ */
+#splash{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:radial-gradient(70% 55% at 50% 35%,rgba(255,255,255,.8),rgba(233,235,239,.6));
+  -webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);
+  transition:opacity .6s,transform .6s var(--smooth),filter .6s}
+#splash.gone{opacity:0;transform:scale(1.16);filter:blur(22px);pointer-events:none}
+.logoBlob{width:132px;height:132px;position:relative;display:grid;place-items:center;
+  background:radial-gradient(circle at 32% 26%,#fff,#ececf0 55%,#cfcfd6);
+  box-shadow:0 24px 55px rgba(0,0,0,.25),inset 0 3px 10px #fff,inset 0 -8px 18px rgba(0,0,0,.22);
+  animation:morph 8s ease-in-out infinite alternate;border-radius:42% 58% 62% 38%/45% 42% 58% 55%}
+.logoBlob::before{content:"";position:absolute;top:14%;left:18%;width:38%;height:26%;border-radius:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.95),transparent);filter:blur(2px);transform:rotate(-18deg)}
+.logoBlob span{font-size:52px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.3))}
+#splash h1{font-size:32px;font-weight:800;letter-spacing:-.03em}
+#splash h1 em{font-style:normal;color:var(--ink)}
+#splash p{font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:-8px}
+#splashBtn{border:0;cursor:pointer;font-family:inherit;font-size:15px;font-weight:800;color:#fff;padding:16px 42px;border-radius:999px;
+  background:#1c1c1e;border:1px solid rgba(255,255,255,.2);position:relative;overflow:hidden;
+  box-shadow:0 16px 36px rgba(0,0,0,.3),inset 0 2px 0 rgba(255,255,255,.25);transition:transform .25s var(--spring)}
+#splashBtn:active{transform:scale(.94)}
+#splash small{font-size:10.5px;font-weight:700;color:var(--ink-soft);max-width:250px;text-align:center;line-height:1.6}
+body.reduce *{animation-duration:.01s !important;animation-iteration-count:1 !important}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div id="stage3d">
+    <div class="layer-bg"><div class="blob b1"><i></i></div><div class="blob b2"><i></i></div><div class="blob b3"><i></i></div></div>
+
+    <!-- HOME -->
+    <section class="screen" id="screenHome">
+      <div class="hello pz1">
+        <div><h1>Hey, tasty&nbsp;day 🫧</h1><p>Your liquid-glass nutrition lens</p></div>
+        <div class="date glass" id="dateChip">MON</div>
+      </div>
+      <div class="ecard glass pz2">
+        <div class="ringwrap">
+          <svg width="132" height="132" viewBox="0 0 132 132">
+            <circle cx="66" cy="66" r="56" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="12"/>
+            <circle id="ringProg" cx="66" cy="66" r="56" fill="none" stroke="#1c1c1e" stroke-width="12" stroke-linecap="round" stroke-dasharray="351.86" stroke-dashoffset="351.86"/>
+          </svg>
+          <div class="ctr"><b id="hKj">0</b><small>kJ today</small></div>
+        </div>
+        <div class="ecol">
+          <div class="pillrow"><span class="mini glass">goal 2500 kJ</span><span class="mini hot">🔥 5-day streak</span></div>
+          <div class="mrow"><span>Protein <b id="valProteinH">23 g</b></span><div class="track"><div class="fill" id="barProtein" style="width:38%"></div></div></div>
+          <div class="mrow"><span>Carbs <b id="valCarbsH">214 g</b></span><div class="track"><div class="fill" id="barCarbs" style="width:69%"></div></div></div>
+          <div class="mrow"><span>Fats <b id="valFatsH">58 g</b></span><div class="track"><div class="fill" id="barFats" style="width:64%"></div></div></div>
+        </div>
+      </div>
+      <div class="mgrid pz1">
+        <div class="mcard glass"><b id="mcScan">0</b><small>scans</small></div>
+        <div class="mcard glass"><b id="mcFiber">18 g</b><small>fiber</small></div>
+        <div class="mcard glass"><b>1.9 L</b><small>water</small></div>
+      </div>
+      <div class="sect"><h2>Recent scans</h2><span>swipe tabs below ↓</span></div>
+      <div id="recentList"><div class="empty">No scans yet — hit <b>Scan</b> and point at your food 📸</div></div>
+    </section>
+
+    <!-- SCAN -->
+    <section class="screen active" id="screenScan">
+      <div class="cap-chip glass pz1">Today's Stats</div>
+      <div class="stats glass pz1" id="statsBar">
+        <div class="seg seg-blue pressable" id="segP"><small>Proteins</small><b><span id="valP">23</span><em> g</em></b></div>
+        <div class="seg seg-red pressable" id="segE"><small>Energy</small><b><span id="valE">1830</span><em> kJ</em></b></div>
+        <div class="seg seg-amber pressable" id="segF"><small>Fiber</small><b><span id="valF">18</span><em> g</em></b></div>
+      </div>
+      <div class="view glass pz2" id="viewWrap">
+        <div id="feedInner">
+          <video id="vidFeed" autoplay muted playsinline disablepictureinpicture></video>
+          <img class="feed" id="imgFallback" alt="fallback feed" style="display:none">
+        </div>
+        <img id="imgCaptured" alt="captured">
+        <div id="gridOverlay"></div>
+        <span class="cor c1"></span><span class="cor c2"></span><span class="cor c3"></span><span class="cor c4"></span>
+        <div id="beam"></div>
+        <div id="particles"></div>
+        <div id="stepsBox"></div>
+        <div class="controls pz1">
+          <button class="sqbtn glass pressable left" id="galleryBtn" title="Pick from gallery">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 20"/></svg>
+          </button>
+          <button class="shutter pressable" id="shutterBtn" title="Shot"><i></i></button>
+          <button class="sqbtn glass pressable right" id="flashBtn" title="Flash">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="screen" id="screenSettings">
+      <div class="cap-chip glass">Settings</div>
+      <div class="list glass">
+        <div class="row"><div class="lb"><span class="ic">🧭</span><div>IMU parallax<small>gyro / tilt reacts the glass</small></div></div>
+          <label class="sw"><input type="checkbox" id="tImu" checked><span></span></label></div>
+        <div class="row"><div class="lb"><span class="ic">📳</span><div>Haptics<small>tiny buzz on taps</small></div></div>
+          <label class="sw"><input type="checkbox" id="tHap" checked><span></span></label></div>
+        <div class="row"><div class="lb"><span class="ic">🌫️</span><div>Glass blur<small id="blurVal">18px</small></div></div>
+          <input type="range" id="rBlur" min="0" max="32" value="18"></div>
+        <div class="row"><div class="lb"><span class="ic">🐢</span><div>Reduce motion<small>calms the liquid down</small></div></div>
+          <label class="sw"><input type="checkbox" id="tMot"><span></span></label></div>
+      </div>
+      <div class="about glass">
+        <b>FoodSpec · phone test build</b><br>
+        real rear camera + real IMU (tilt) · result is still a demo apple 🍎 for testing.<br>
+        serve over HTTPS (or localhost) or the camera will be blocked by the browser.
+      </div>
+    </section>
+
+    <!-- TAB BAR -->
+    <nav id="tabBar">
+      <div id="tabIndicator"></div>
+      <button class="tab pressable" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 22V12h6v10"/></svg>home</button>
+      <button class="tab pressable active" data-tab="scan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="8" y="9" width="8" height="6" rx="1.5"/><circle cx="12" cy="12" r="1.6"/></svg>scan</button>
+      <button class="tab pressable" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h0a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h0a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v0a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>settings</button>
+    </nav>
+
+    <!-- RESULT SHEET -->
+    <div class="sheet" id="sheetResult">
+      <div class="scrim" id="scrimR"></div>
+      <div class="panel">
+        <div class="handle"></div>
+        <div class="rhead">
+          <div class="thumbwrap">
+            <img id="resThumb" alt="food">
+            <svg width="76" height="76" viewBox="0 0 76 76"><circle cx="38" cy="38" r="34" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="3.5"/><circle id="confRing" cx="38" cy="38" r="34" fill="none" stroke="#1c1c1e" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6" style="transition:stroke-dashoffset 1.2s cubic-bezier(.32,.72,.25,1.1)"/></svg>
+          </div>
+          <div class="tt"><b id="resName">Apple, raw · medium (182 g)</b><span class="conf"><i></i><span id="confTxt">98.4% match · Qwen-VL</span></span></div>
+          <button class="xbtn pressable" id="closeR"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </div>
+        <div id="pagesWrap">
+          <div class="page">
+            <div class="kcalrow glass"><div class="big"><b>95</b><small>kcal</small></div>
+              <div class="side">397 kJ<br>water 86%<br>GI 36 · low</div></div>
+            <div class="bars glass">
+              <div class="brow"><span>Carbs</span><div class="track"><div class="fill" data-w="50"></div></div><em>25 g</em></div>
+              <div class="brow"><span>Fiber</span><div class="track"><div class="fill" data-w="32"></div></div><em>4.4 g</em></div>
+              <div class="brow"><span>Sugars</span><div class="track"><div class="fill" data-w="38"></div></div><em>19 g</em></div>
+              <div class="brow"><span>Protein</span><div class="track"><div class="fill" data-w="4"></div></div><em>0.5 g</em></div>
+              <div class="brow"><span>Fat</span><div class="track"><div class="fill" data-w="2"></div></div><em>0.3 g</em></div>
+            </div>
+          </div>
+          <div class="page"><div class="vgrid" id="vGrid"></div></div>
+          <div class="page">
+            <div class="coachcard glass"><div class="who">🥑 AI Coach</div>
+              Nice pick! 🍎 A medium apple = 95 kcal of slow sugar + 4.4 g fiber (16% DV) — great pre-walk snack.
+              Eat the skin: that's where the quercetin & half the fiber live. Want protein with it? Swipe-tap a question below.</div>
+            <div class="qchips">
+              <button class="qchip pressable" data-q="Pair ideas for my apple?"> pair ideas</button>
+              <button class="qchip pressable" data-q="Why does fiber matter?">🌾 why fiber?</button>
+              <button class="qchip pressable" data-q="Protein tip for today?">💪 protein tip</button>
+            </div>
+          </div>
+        </div>
+        <div class="dots" id="dotsBox"><button class="dot on"></button><button class="dot"></button><button class="dot"></button></div>
+        <div class="acts"><button id="addBtn" class="pressable">Add to today's stats</button><button id="rescanBtn" class="pressable">Scan again</button></div>
+      </div>
+    </div>
+
+    <!-- COACH SHEET -->
+    <div class="sheet" id="sheetCoach">
+      <div class="scrim" id="scrimC"></div>
+      <div class="panel">
+        <div class="handle"></div>
+        <div class="rhead"><div class="tt"><b>AI Coach</b><span class="conf"><i></i>fine-tuned Qwen-VL · online</span></div>
+          <button class="xbtn pressable" id="closeC"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+        <div id="chatBox"></div>
+        <div class="qchips" id="chipsRow">
+          <button class="qchip pressable" data-q="What did I eat today?">what did I eat?</button>
+          <button class="qchip pressable" data-q="Protein tip for today?">protein tip</button>
+          <button class="qchip pressable" data-q="Pair ideas for my apple?">pair ideas</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="flashOverlay"></div>
+    <div id="rippleLayer"></div>
+
+    <!-- SPLASH -->
+    <div id="splash">
+      <div class="logoBlob"><span>🍎</span></div>
+      <h1>Food<em>Spec</em></h1>
+      <p>liquid-glass nutrition lens</p>
+      <button id="splashBtn" class="pressable">Tap to start</button>
+      <small>test build · asks for camera + motion. needs HTTPS on a real phone. result is always a demo apple 🍎.</small>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const phone=$("#phone");
+
+/* ---------- SVG apple artwork (fallback feed / gallery / thumb) ---------- */
+const SCENE_SVG=`<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 720 720"><defs><radialGradient id="bg" cx="50%" cy="38%" r="80%"><stop offset="0" stop-color="#f6f6f8"/><stop offset="1" stop-color="#e3e3e8"/></radialGradient><radialGradient id="pl" cx="42%" cy="36%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e0e0e5"/></radialGradient><radialGradient id="ap" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#ff8a80"/><stop offset=".45" stop-color="#e53946"/><stop offset="1" stop-color="#9c1024"/></radialGradient><linearGradient id="lf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8be08b"/><stop offset="1" stop-color="#2f9e44"/></linearGradient></defs><rect width="720" height="720" fill="url(#bg)"/><ellipse cx="360" cy="404" rx="252" ry="238" fill="url(#pl)"/><ellipse cx="360" cy="404" rx="196" ry="186" fill="none" stroke="#c4c4c9" stroke-width="6" opacity=".55"/><ellipse cx="368" cy="452" rx="128" ry="42" fill="#a0a0a8" opacity=".28"/><path d="M360 268c-70-26-140 18-146 96-6 84 44 158 108 170 22 4 34-6 38-6s16 10 38 6c64-12 114-86 108-170-6-78-76-122-146-96z" fill="url(#ap)"/><ellipse cx="306" cy="330" rx="46" ry="30" fill="#ffffff" opacity=".5" transform="rotate(-24 306 330)"/><path d="M360 272c-2-26 6-42 20-54" stroke="#6b4226" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M382 236c34-30 74-26 92-6-22 26-64 30-92 6z" fill="url(#lf)"/></svg>`;
+const svgURL=s=>"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s);
+const FALLBACK_URL=svgURL(SCENE_SVG);
+const fallbackImg=new Image(); fallbackImg.src=FALLBACK_URL;
+
+/* ---------- state ---------- */
+const state={protein:23,kj:1830,fiber:18,carbs:214,fats:58,scans:0,
+  imuOn:true,hapOn:true,cameraOK:false,processing:false,flashOn:false,
+  camMode:"main",pageIdx:0,added:false,started:false};
+const APPLE={name:"Apple, raw · medium (182 g)",kcal:95,kj:397,protein:.5,carbs:25,fiber:4.4,fats:.3,
+  vits:[["Vitamin C","8.4 mg",9],["Vitamin K","4.4 µg",4],["Vitamin B6","0.08 mg",5],["Vitamin E","0.34 mg",2],["Potassium","195 mg",4],["Magnesium","9 mg",2]]};
+
+/* ---------- haptics (no tap splash / no ripple) ---------- */
+function buzz(ms){ if(state.hapOn && navigator.vibrate) navigator.vibrate(ms); }
+phone.addEventListener("pointerdown",()=>{ impulse=.6; buzz(8); });
+
+/* ---------- tilt / REAL phone IMU + desktop mouse fallback ---------- */
+let tTX=0,tTY=0,cX=0,cY=0,impulse=0,imuSeen=false,imuLast=0;
+function applyTilt(nx,ny){ if(!state.imuOn)return; tTX=Math.max(-1,Math.min(1,nx)); tTY=Math.max(-1,Math.min(1,ny)); }
+function handleOrientation(ev){
+  if(!state.imuOn)return;
+  if(ev.gamma==null||ev.beta==null)return;
+  imuSeen=true; imuLast=performance.now();
+  // gamma = left/right tilt, beta = front/back. Offset beta so holding phone ~45deg = neutral.
+  applyTilt(ev.gamma/28,(ev.beta-45)/28);
+}
+window.addEventListener("deviceorientation",handleOrientation,true);
+window.addEventListener("deviceorientationabsolute",handleOrientation,true);
+// Fallback: derive tilt from accelerationIncludingGravity (some Android WebViews)
+window.addEventListener("devicemotion",ev=>{
+  if(!state.imuOn||imuSeen)return;
+  const a=ev.accelerationIncludingGravity; if(!a||a.x==null)return;
+  imuSeen=true; imuLast=performance.now();
+  applyTilt(-a.x/9.8,-(a.y-4)/9.8);
+},true);
+// Desktop only: mouse parallax (never on touch phones)
+if(window.matchMedia&&matchMedia("(pointer:fine)").matches){
+  window.addEventListener("mousemove",ev=>{
+    if(imuSeen&&performance.now()-imuLast<4000)return; // real IMU wins when present
+    const r=phone.getBoundingClientRect();
+    applyTilt(((ev.clientX-r.left)/r.width*2-1), ((ev.clientY-r.top)/r.height*2-1));
+  });
+}
+let drift0=performance.now();
+(function loop(t){
+  const dt=t-drift0;
+  let dx=tTX, dy=tTY;
+  if(!document.body.classList.contains("reduce")){
+    dx+=Math.sin(dt*0.00035)*0.30; dy+=Math.cos(dt*0.00028)*0.26;
+  }
+  cX+=(dx-cX)*0.075; cY+=(dy-cY)*0.075; impulse*=0.90;
+  phone.style.setProperty("--gx",cX.toFixed(4));
+  phone.style.setProperty("--gy",cY.toFixed(4));
+  phone.style.setProperty("--imp",impulse.toFixed(4));
+  requestAnimationFrame(loop);
+})(drift0);
+
+/* ---------- date chip (no fake statusbar — real phone has its own) ---------- */
+function tick(){ const d=new Date();
+  const dc=$("#dateChip"); if(dc) dc.textContent=d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"}).toUpperCase(); }
+tick(); setInterval(tick,20000);
+
+/* ---------- tabs ---------- */
+const screens={home:"#screenHome",scan:"#screenScan",settings:"#screenSettings"};
+function setTab(name){
+  $$(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
+  Object.entries(screens).forEach(([k,sel])=>$(sel).classList.toggle("active",k===name));
+  const btn=$('.tab[data-tab="'+name+'"]'), ind=$("#tabIndicator");
+  ind.style.transform="translateX("+btn.offsetLeft+"px)";
+  ind.classList.remove("squish"); void ind.offsetWidth; ind.classList.add("squish");
+  if(name==="home") updateHome(true);
+  buzz(6);
+}
+$$(".tab").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+window.addEventListener("resize",()=>setTab($('.tab.active').dataset.tab));
+
+/* ---------- REAL phone camera ---------- */
+let camStream=null;
+async function startCamera(){
+  const vid=$("#vidFeed"), fb=$("#imgFallback");
+  try{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia) throw new Error("no-getUserMedia");
+    if(camStream) camStream.getTracks().forEach(t=>t.stop());
+    // ideal (not exact) so desktop + all phones can satisfy it; needs HTTPS on real phone
+    const stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}},
+      audio:false});
+    camStream=stream;
+    vid.srcObject=stream;
+    vid.setAttribute("playsinline",""); vid.muted=true;
+    await vid.play();
+    state.cameraOK=true; vid.style.display="block"; fb.style.display="none";
+  }catch(err){
+    state.cameraOK=false; vid.style.display="none"; fb.style.display="block"; fb.src=FALLBACK_URL;
+  }
+}
+function captureFrame(){
+  const c=document.createElement("canvas"); c.width=720; c.height=720;
+  const ctx=c.getContext("2d");
+  const v=$("#vidFeed");
+  if(state.cameraOK&&v.videoWidth){
+    const vw=v.videoWidth, vh=v.videoHeight;
+    const side=Math.min(vw,vh), sx=(vw-side)/2, sy=(vh-side)/2;
+    ctx.drawImage(v,sx,sy,side,side,0,0,720,720);
+  }else if(fallbackImg.complete&&fallbackImg.naturalWidth!==0){
+    ctx.drawImage(fallbackImg,0,0,720,720);
+  }else{
+    const fb=$("#imgFallback");
+    if(fb.src) ctx.drawImage(fb,0,0,720,720);
+  }
+  try{ return c.toDataURL("image/jpeg",.86); }catch(e){ return FALLBACK_URL; }
+}
+// Real gallery picker: user picks a REAL photo, but result sheet still shows demo apple
+let pickedPhotoURL=null;
+const fileInput=document.createElement("input");
+fileInput.type="file"; fileInput.accept="image/*"; fileInput.style.display="none";
+document.body.appendChild(fileInput);
+fileInput.addEventListener("change",()=>{
+  const f=fileInput.files&&fileInput.files[0]; if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{ pickedPhotoURL=String(rd.result); scanFlow("file"); fileInput.value=""; };
+  rd.readAsDataURL(f);
+});
+
+/* ---------- cam switch (swipe on viewfinder) ---------- */
+const viewWrap=$("#viewWrap");
+let vDown=null;
+viewWrap.addEventListener("pointerdown",e=>{ vDown={x:e.clientX,y:e.clientY}; });
+viewWrap.addEventListener("pointerup",e=>{
+  if(!vDown)return;
+  const dx=e.clientX-vDown.x, dy=e.clientY-vDown.y; vDown=null;
+  if(state.processing||Math.abs(dx)<55||Math.abs(dx)<Math.abs(dy))return;
+  state.camMode = state.camMode==="main" ? "wide" : "main";
+  $("#feedInner").classList.toggle("wide",state.camMode==="wide");
+  buzz(10);
+});
+
+/* ---------- flash ---------- */
+$("#flashBtn").addEventListener("click",()=>{
+  state.flashOn=!state.flashOn;
+  $("#flashBtn").classList.toggle("on",state.flashOn);
+  $("#feedInner").style.filter=state.flashOn?"brightness(1.28) saturate(1.12)":"";
+});
+
+/* ---------- processing pipeline (no step popups — straight to apple result) ---------- */
+async function scanFlow(source){
+  if(state.processing)return;
+  state.processing=true; state.added=false;
+  const addBtn=$("#addBtn"); addBtn.classList.remove("done"); addBtn.textContent="Add to today's stats"; addBtn.disabled=false;
+  buzz(14);
+  const fl=$("#flashOverlay"); fl.classList.remove("show"); void fl.offsetWidth; fl.classList.add("show");
+  await wait(140);
+  // TEST BUILD: always demo-apple result, but thumbnail = REAL photo when available
+  let shot;
+  if(source==="file"&&pickedPhotoURL){ shot=pickedPhotoURL; pickedPhotoURL=null; }
+  else if(source==="cam"){ shot=captureFrame(); }
+  else { shot=FALLBACK_URL; }
+  const cap=$("#imgCaptured"); cap.src=shot; cap.classList.add("show");
+  viewWrap.classList.add("processing");
+  await wait(900);
+  openResult(shot);
+}
+$("#shutterBtn").addEventListener("click",()=>scanFlow("cam"));
+$("#galleryBtn").addEventListener("click",()=>fileInput.click());
+
+/* ---------- result sheet ---------- */
+function buildVits(){
+  const g=$("#vGrid"); g.innerHTML="";
+  APPLE.vits.forEach(([n,mg,pct])=>{
+    const C=2*Math.PI*14;
+    const el=document.createElement("div"); el.className="vchip glass";
+    el.innerHTML=`<svg width="38" height="38" viewBox="0 0 38 38"><circle cx="19" cy="19" r="14" fill="none" stroke="rgba(0,0,0,.14)" stroke-width="4"/><circle cx="19" cy="19" r="14" fill="none" stroke="#1c1c1e" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct/100)}"/></svg><div><b>${n}</b><small>${mg} · ${pct}% DV</small></div>`;
+    g.appendChild(el);
+  });
+}
+buildVits();
+function setPage(i){
+  state.pageIdx=Math.max(0,Math.min(2,i));
+  $("#pagesWrap").style.transform="translateX("+(-state.pageIdx*100)+"%)";
+  $$("#dotsBox .dot").forEach((d,k)=>d.classList.toggle("on",k===state.pageIdx));
+}
+$$("#dotsBox .dot").forEach((d,i)=>d.addEventListener("click",()=>setPage(i)));
+const pagesWrap=$("#pagesWrap");
+let pDown=null;
+pagesWrap.addEventListener("pointerdown",e=>{pDown={x:e.clientX,y:e.clientY};});
+pagesWrap.addEventListener("pointerup",e=>{
+  if(!pDown)return; const dx=e.clientX-pDown.x, dy=e.clientY-pDown.y; pDown=null;
+  if(Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy))return;
+  setPage(state.pageIdx+(dx<0?1:-1)); buzz(6);
+});
+function openResult(shot){
+  $("#resThumb").src=shot;
+  $("#resName").textContent=APPLE.name;
+  const conf=(97+Math.random()*2.4).toFixed(1);
+  $("#confTxt").textContent=conf+"% match · Qwen-VL";
+  setPage(0);
+  $("#sheetResult").classList.add("open");
+  const C=213.6;
+  $("#confRing").style.strokeDashoffset=C;
+  setTimeout(()=>{ $("#confRing").style.strokeDashoffset=C*(1-conf/100);
+    $$("#sheetResult .fill").forEach(f=>{ f.style.width="0%"; requestAnimationFrame(()=>{ f.style.width=f.dataset.w+"%"; }); });
+  },250);
+  buzz(12);
+}
+function closeResult(){
+  $("#sheetResult").classList.remove("open");
+  setTimeout(()=>{
+    viewWrap.classList.remove("processing");
+    $("#stepsBox").innerHTML=""; $("#particles").innerHTML="";
+    $("#imgCaptured").classList.remove("show");
+    state.processing=false;
+  },420);
+}
+$("#closeR").addEventListener("click",closeResult);
+$("#scrimR").addEventListener("click",closeResult);
+$("#rescanBtn").addEventListener("click",()=>{ closeResult(); buzz(8); });
+
+/* ---------- count-up + stats ---------- */
+function countUp(el,from,to,dec,dur){
+  const t0=performance.now();
+  (function f(t){
+    const k=Math.min(1,(t-t0)/(dur||900)), e=1-Math.pow(1-k,3);
+    el.textContent=(from+(to-from)*e).toFixed(dec);
+    if(k<1)requestAnimationFrame(f);
+  })(t0);
+}
+function fmt(el,v,dec){ el.textContent=v.toFixed(dec); }
+function updateHome(animate){
+  const kj=$("#hKj");
+  if(animate){ countUp(kj,parseInt(kj.textContent)||0,state.kj,0,1000); } else kj.textContent=state.kj;
+  const C=351.86;
+  $("#ringProg").style.strokeDashoffset=C*(1-Math.min(1,state.kj/2500));
+  $("#valProteinH").textContent=state.protein.toFixed(state.protein%1?1:0)+" g";
+  $("#valCarbsH").textContent=Math.round(state.carbs)+" g";
+  $("#valFatsH").textContent=Math.round(state.fats)+" g";
+  $("#barProtein").style.width=Math.min(100,state.protein/60*100)+"%";
+  $("#barCarbs").style.width=Math.min(100,state.carbs/310*100)+"%";
+  $("#barFats").style.width=Math.min(100,state.fats/90*100)+"%";
+  $("#mcScan").textContent=state.scans;
+  $("#mcFiber").textContent=state.fiber.toFixed(state.fiber%1?1:0)+" g";
+}
+$("#addBtn").addEventListener("click",function(){
+  if(state.added)return; state.added=true;
+  const p0=state.protein,k0=state.kj,f0=state.fiber;
+  state.protein+=APPLE.protein; state.kj+=APPLE.kj; state.fiber+=APPLE.fiber;
+  state.carbs+=APPLE.carbs; state.fats+=APPLE.fats; state.scans+=1;
+  countUp($("#valP"),p0,state.protein,1); countUp($("#valE"),k0,state.kj,0); countUp($("#valF"),f0,state.fiber,1);
+  ["#segP","#segE","#segF"].forEach(s=>{ const el=$(s); el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); });
+  this.classList.add("done"); this.textContent="Added ✓ nice crunch";
+  const list=$("#recentList");
+  const empty=list.querySelector(".empty"); if(empty)empty.remove();
+  const card=document.createElement("div"); card.className="rcard glass";
+  card.innerHTML=`<img src="${$("#resThumb").src}" alt=""><div class="inf"><b>${APPLE.name.split("·")[0].trim()}</b><small>just now · main cam</small></div><span class="kcal">95 kcal</span>`;
+  list.prepend(card);
+  updateHome(true); buzz(18);
+  setTimeout(closeResult,850);
+});
+
+/* ---------- coach ---------- */
+const REPLIES={
+  "Pair ideas for my apple?":"🥜 1 tbsp peanut butter or a handful of almonds adds ~7 g protein + slows the sugar curve. Cheese cube works too — very snack-board of you 🧀",
+  "Why does fiber matter?":"🌾 4.4 g of fiber = 16% DV. It feeds your gut microbes, blunts the glucose spike and keeps you full ~1 h longer. The skin holds half of it!",
+  "Protein tip for today?":"💪 You're at "+state.protein+" g of 60 g today. A skyr cup (+11 g) or two eggs (+12 g) at dinner closes the gap easily.",
+  "What did I eat today?":" So far: your earlier meals (~1830 kJ)"+(state.scans?" + 1 scanned apple (397 kJ)":"")+". Swipe the Scan tab to log more — I'll do the math 🫧",
+  default:"Good question! In this concept I'm a UI demo — the real me runs on a fine-tuned Qwen-VL server 😄 Try the suggestion chips!"
+};
+function pushMsg(txt,who){
+  const m=document.createElement("div"); m.className="msg "+who; m.textContent=txt;
+  $("#chatBox").appendChild(m); $("#chatBox").scrollTop=1e6; return m;
+}
+async function askCoach(q){
+  $("#sheetCoach").classList.add("open");
+  if(!$("#chatBox").children.length) pushMsg("Hey! I'm your AI nutrition coach 🥑 Scanned something? Ask me anything.","coach");
+  await wait(250); pushMsg(q,"user"); buzz(6);
+  const ty=document.createElement("div"); ty.className="msg coach typing"; ty.innerHTML="<i></i><i></i><i></i>";
+  $("#chatBox").appendChild(ty); $("#chatBox").scrollTop=1e6;
+  await wait(950); ty.remove();
+  pushMsg(REPLIES[q]||REPLIES.default,"coach"); buzz(8);
+}
+$("#closeC").addEventListener("click",()=>$("#sheetCoach").classList.remove("open"));
+$("#scrimC").addEventListener("click",()=>$("#sheetCoach").classList.remove("open"));
+$$(".qchip").forEach(c=>c.addEventListener("click",()=>askCoach(c.dataset.q)));
+
+/* ---------- settings ---------- */
+$("#tImu").addEventListener("change",e=>{ state.imuOn=e.target.checked;
+  if(!state.imuOn){tTX=0;tTY=0;} });
+$("#tHap").addEventListener("change",e=>{ state.hapOn=e.target.checked; });
+$("#tMot").addEventListener("change",e=>{ document.body.classList.toggle("reduce",e.target.checked); });
+$("#rBlur").addEventListener("input",e=>{ document.documentElement.style.setProperty("--gb",e.target.value+"px");
+  $("#blurVal").textContent=e.target.value+"px"; });
+
+/* ---------- splash / REAL permissions (camera + IMU) ---------- */
+$("#splashBtn").addEventListener("click",async()=>{
+  if(state.started)return; state.started=true; buzz(16);
+  // iOS 13+: motion permission must be requested from a user gesture
+  try{
+    if(typeof DeviceOrientationEvent!=="undefined" && DeviceOrientationEvent.requestPermission){
+      await DeviceOrientationEvent.requestPermission();
+    }
+  }catch(e){}
+  try{
+    if(typeof DeviceMotionEvent!=="undefined" && DeviceMotionEvent.requestPermission){
+      await DeviceMotionEvent.requestPermission();
+    }
+  }catch(e){}
+  await startCamera();
+  $("#splash").classList.add("gone");
+  setTimeout(()=>{ $("#splash").style.display="none"; },700);
+  setTab("scan");
+  updateHome(false);
+});
+/* init */
+setPage(0);
+requestAnimationFrame(()=>{ const b=$('.tab[data-tab="scan"]'); $("#tabIndicator").style.transform="translateX("+b.offsetLeft+"px)"; });
+updateHome(false);
+</script>
+</body>
+</html>
